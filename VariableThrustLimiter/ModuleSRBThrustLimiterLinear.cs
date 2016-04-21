@@ -17,7 +17,7 @@ namespace VariableThrustLimiter
             if (!HighLogic.LoadedSceneIsFlight)
                 return;
 
-            ModuleEngines SRBModule = part.Modules.GetModules<ModuleEngines>().FirstOrDefault(e => e.propellants.FindAll(p => p.name == "SolidFuel").Count > 0);
+            ModuleEngines SRBModule = part.Modules.GetModules<ModuleEngines>().FirstOrDefault(e => e.propellants.Any(p => p.name == "SolidFuel"));
             
             // We found a SR engine on this part, time to do stuff
             if (SRBModule != null)
