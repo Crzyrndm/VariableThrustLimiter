@@ -12,11 +12,10 @@ namespace VariableThrustLimiter
         public override void OnStart(StartState state)
         {
  	        base.OnStart(state);
-
             // only want to modify anything in the flight scene..., for now...
             if (!HighLogic.LoadedSceneIsFlight)
                 return;
-
+            
             ModuleEngines SRBModule = part.Modules.GetModules<ModuleEngines>().FirstOrDefault(e => e.propellants.Any(p => p.name == "SolidFuel"));
             
             // We found a SR engine on this part, time to do stuff
@@ -27,7 +26,7 @@ namespace VariableThrustLimiter
                     // if it already has a thrust curve, I want to reshape it to meet my needs
                     // should really adjust tangents as well. Some other time
                     float maxTime = Math.Max(SRBModule.thrustCurve.Curve.keys.Max(k => k.time), 0.00001f);
-                    float thrustRatio = (SRBModule.thrustPercentage - LimiterEnd) / (100 * Math.Max(SRBModule.thrustPercentage, 0.00001f));
+                    float thrustRatio = (SRBModule.thrustPercentage - LimiterEnd) / (Math.Max(SRBModule.thrustPercentage, 0.00001f));
                     for (int i = 0; i < SRBModule.thrustCurve.Curve.length; ++i)
                         SRBModule.thrustCurve.Curve.keys[i].value *= 1 - ((maxTime - SRBModule.thrustCurve.Curve.keys[i].time) / maxTime) * thrustRatio;
                 }
@@ -36,7 +35,7 @@ namespace VariableThrustLimiter
                     // else, I can use it for my own benefit
                     SRBModule.useThrustCurve = true;
                     SRBModule.thrustCurve.Add(1f, 1f);
-                    SRBModule.thrustCurve.Add(0f, LimiterEnd / (100f * Math.Max(SRBModule.thrustPercentage, 0.00001f)));
+                    SRBModule.thrustCurve.Add(0f, LimiterEnd / (Math.Max(SRBModule.thrustPercentage, 0.00001f)));
                 }
             }
         }
