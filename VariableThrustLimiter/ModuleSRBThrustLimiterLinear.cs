@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using UnityEngine;
 
 namespace VariableThrustLimiter
 {
@@ -16,26 +14,28 @@ namespace VariableThrustLimiter
             if (!HighLogic.LoadedSceneIsFlight)
                 return;
             
-            ModuleEngines SRBModule = part.Modules.GetModules<ModuleEngines>().FirstOrDefault(e => e.propellants.Any(p => p.name == "SolidFuel"));
+            ModuleEngines EngineModule = part.Modules.GetModules<ModuleEngines>().Find(e => e.throttleLocked);
             
             // We found a SR engine on this part, time to do stuff
-            if (SRBModule != null)
+            if (EngineModule != null)
             {
-                if (SRBModule.useThrustCurve)
+                if (EngineModule.useThrustCurve)
                 {
-                    // if it already has a thrust curve, I want to reshape it to meet my needs
-                    // should really adjust tangents as well. Some other time
-                    float maxTime = Math.Max(SRBModule.thrustCurve.Curve.keys.Max(k => k.time), 0.00001f);
-                    float thrustRatio = (SRBModule.thrustPercentage - LimiterEnd) / (Math.Max(SRBModule.thrustPercentage, 0.00001f));
-                    for (int i = 0; i < SRBModule.thrustCurve.Curve.length; ++i)
-                        SRBModule.thrustCurve.Curve.keys[i].value *= 1 - ((maxTime - SRBModule.thrustCurve.Curve.keys[i].time) / maxTime) * thrustRatio;
+                    for (int i = 0; i < EngineModule.thrustCurve.Curve.length; ++i)
+                    {
+                        float modifier = 1 - EngineModule.thrustCurve.Curve.keys[i].time * (1 - LimiterEnd);
+                        EngineModule.thrustCurve.Curve.keys[i].value *= modifier;
+                        EngineModule.thrustCurve.Curve.keys[i].inTangent *= modifier;
+                        EngineModule.thrustCurve.Curve.keys[i].outTangent *= modifier;
+
+                    }
                 }
                 else
                 {
                     // else, I can use it for my own benefit
-                    SRBModule.useThrustCurve = true;
-                    SRBModule.thrustCurve.Add(1f, 1f);
-                    SRBModule.thrustCurve.Add(0f, LimiterEnd / (Math.Max(SRBModule.thrustPercentage, 0.00001f)));
+                    EngineModule.useThrustCurve = true;
+                    EngineModule.thrustCurve.Add(1f, 1f);
+                    EngineModule.thrustCurve.Add(0f, LimiterEnd / (Math.Max(EngineModule.thrustPercentage, 0.00001f)));
                 }
             }
         }
