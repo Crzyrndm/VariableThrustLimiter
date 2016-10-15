@@ -34,8 +34,8 @@ namespace VariableThrustLimiter
                 {
                     // else, I can use it for my own benefit
                     EngineModule.useThrustCurve = true;
-                    EngineModule.thrustCurve.Add(1f, 1f);
-                    EngineModule.thrustCurve.Add(0f, LimiterEnd / (Math.Max(EngineModule.thrustPercentage, 0.00001f)));
+                    //EngineModule.thrustCurve.Add(1f, 1f);
+                    EngineModule.thrustCurve.Add(0f, LimiterEnd);
                 }
             }
         }
